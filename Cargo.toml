@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+  "shared",
+  "client",
+  "web",
+  "server",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2024"
+
+[workspace.metadata.crane]
+name = "crane-template"
+version = "0.0.1"
