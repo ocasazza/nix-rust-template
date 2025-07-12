@@ -1,5 +1,5 @@
 [package]
-name = "web"
+name = "nix-rust-template-web"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
@@ -10,5 +10,5 @@ license.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-shared = { version = "0.0.1", path = "../shared" }
+nix-rust-template-shared = { version = "0.0.1", path = "../shared" }
 wasm-bindgen = "0.2"

@@ -1,7 +1,6 @@
 use gloo::net;
 use yew::prelude::*;
-
-use shared::Post;
+use nix_rust_template_shared::Post;
 
 async fn request_posts() -> Vec<Post> {
     net::http::Request::get("http://localhost:8000/posts")

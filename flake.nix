@@ -64,20 +64,15 @@
         commonArgs = {
           inherit src;
           strictDeps = true;
-
-          buildInputs =
-            [
-              # Add additional build inputs here
-            ]
-            ++ lib.optionals pkgs.stdenv.isDarwin [
-              # Additional darwin specific inputs can be set here
-              pkgs.libiconv
-            ];
+          buildInputs = [] ++ lib.optionals pkgs.stdenv.isDarwin [
+            # Additional darwin specific inputs can be set here
+            pkgs.libiconv
+          ];
         };
 
         # Native packages
         nativeArgs = commonArgs // {
-          pname = "crane-template-native";
+          pname = "nix-rust-template-server";
         };
 
         # Build *just* the cargo dependencies, so we can reuse
@@ -99,8 +94,8 @@
         # it's not possible to build the server on the
         # wasm32 target, so we only build the client.
         wasmArgsWeb = commonArgs // {
-          pname = "web";
-          cargoExtraArgs = "--package=web";
+          pname = "nix-rust-template-web";
+          cargoExtraArgs = "--package=nix-rust-template-web";
           CARGO_BUILD_TARGET = "wasm32-unknown-unknown";
         };
 
@@ -143,8 +138,8 @@
         # it's not possible to build the server on the
         # wasm32 target, so we only build the client.
         wasmArgs = commonArgs // {
-          pname = "crane-template-wasm";
-          cargoExtraArgs = "--package=client";
+          pname = "nix-rust-template-client";
+          cargoExtraArgs = "--package=nix-rust-template-client";
           CARGO_BUILD_TARGET = "wasm32-unknown-unknown";
         };
 
@@ -160,7 +155,7 @@
         myClient = craneLib.buildTrunkPackage (
           wasmArgs
           // {
-            pname = "crane-template-client";
+            # pname = "nix-rust-template-client";
             cargoArtifacts = cargoArtifactsWasm;
             # Trunk expects the current directory to be the crate to compile
             preBuild = ''
@@ -198,21 +193,28 @@
           # Build the crate as part of `nix flake check` for convenience
           inherit myServer myClient myWeb;
 
+          nix-rust-template-doc = craneLib.cargoDoc (
+            commonArgs
+            // {
+              inherit cargoArtifacts;
+            }
+          );
+
           # Run clippy (and deny all warnings) on the crate source,
           # again, reusing the dependency artifacts from above.
           #
           # Note that this is done as a separate derivation so that
           # we can block the CI if there are issues here, but not
           # prevent downstream consumers from building our crate by itself.
-          # my-app-clippy = craneLib.cargoClippy (
-          #   commonArgs
-          #   // {
-          #     inherit cargoArtifacts;
-          #     cargoClippyExtraArgs = "--all-targets -- --deny warnings";
-          #     # Here we don't care about serving the frontend
-          #     CLIENT_DIST = "";
-          #   }
-          # );
+          server-clippy = craneLib.cargoClippy (
+            commonArgs
+            // {
+              inherit cargoArtifacts;
+              cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+              # Here we don't care about serving the frontend
+              CLIENT_DIST = "./client";
+            }
+          );
 
           # Check formatting
           # my-app-fmt = craneLib.cargoFmt commonArgs;

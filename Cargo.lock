@@ -207,15 +207,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
 
 [[package]]
-name = "client"
-version = "0.0.1"
-dependencies = [
- "gloo 0.11.0",
- "shared",
- "yew",
-]
-
-[[package]]
 name = "console_error_panic_hook"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1037,6 +1028,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "nix-rust-template-client"
+version = "0.0.1"
+dependencies = [
+ "gloo 0.11.0",
+ "nix-rust-template-shared",
+ "yew",
+]
+
+[[package]]
+name = "nix-rust-template-server"
+version = "0.0.1"
+dependencies = [
+ "axum",
+ "nix-rust-template-shared",
+ "tokio",
+ "tower-http",
+]
+
+[[package]]
+name = "nix-rust-template-shared"
+version = "0.0.1"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "nix-rust-template-web"
+version = "0.0.1"
+dependencies = [
+ "nix-rust-template-shared",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "num_cpus"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1330,23 +1355,6 @@ dependencies = [
  "form_urlencoded",
  "itoa",
  "ryu",
- "serde",
-]
-
-[[package]]
-name = "server"
-version = "0.0.1"
-dependencies = [
- "axum",
- "shared",
- "tokio",
- "tower-http",
-]
-
-[[package]]
-name = "shared"
-version = "0.0.1"
-dependencies = [
  "serde",
 ]
 
@@ -1710,14 +1718,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a05d73b933a847d6cccdda8f838a22ff101ad9bf93e33684f39c1f5f0eece3d"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "web"
-version = "0.0.1"
-dependencies = [
- "shared",
- "wasm-bindgen",
 ]
 
 [[package]]

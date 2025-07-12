@@ -33,19 +33,9 @@ jobs:
       - name: Process and upload build artifacts
         run: |
           mkdir -p artifacts
-          jq -r '.result.ROOT.build.byName | to_entries[] | "\(.key):\(.value)"' result > artifact_mapping.txt
-          while IFS=':' read -r name path; do
-            mkdir -p "artifacts/$name"
-            if [ -d "$path" ]; then
-              cp -r "$path"/* "artifacts/$name/" 2>/dev/null || cp -r "$path" "artifacts/$name/"
-            elif [ -f "$path" ]; then
-              cp "$path" "artifacts/$name/"
-            else
-              continue
-            fi
-            echo "artifact_${name}=true" >> $GITHUB_OUTPUT
-            echo "Prepared artifact: $name"
-          done < artifact_mapping.txt
+          jq -r '.result.ROOT.build.byName | to_entries[] | "\(.key):\(.value)"' result | while IFS=':' read -r name path; do
+            [ -e "$path" ] && mkdir -p "artifacts/$name" && cp -r "$path" "artifacts/$name/" && echo "Prepared artifact: $name"
+          done
 
       - name: Upload all build artifacts (combined)
         uses: actions/upload-artifact@v4
@@ -55,120 +45,135 @@ jobs:
           retention-days: 7
           compression-level: 6
 
+  pages:
+    needs: omnix
+    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  # pages:
-  #   # needs: ci
-  #   # if: ${{ needs.ci.result == 'success' }}
-  #   permissions:
-  #     pages: write
-  #     id-token: write
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: DeterminateSystems/nix-installer-action@main
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nix-builds-ubuntu-latest
+          path: artifacts/
 
-  #     - name: Configure GitHub pages
-  #       id: pages
-  #       uses: actions/configure-pages@v5
+      - name: Configure GitHub pages
+        id: pages
+        uses: actions/configure-pages@v5
 
-  #     - name: Build Rust documentation
-  #       # We pass --document-private-items and --document-hidden items to ensure
-  #       # that documentation always builds even for these items. This makes
-  #       # future changes to make those items public/non-hidden more painless.
-  #       # Note that --document-hidden-items is unstable; if a future release
-  #       # breaks or removes it, we can just update CI to no longer pass that
-  #       # flag.
-  #       # METADATA_DOCS_RS_RUSTDOC_ARGS='--cfg doc_cfg --generate-link-to-definition'
-  #       # export RUSTDOCFLAGS="-Z unstable-options --document-hidden-items $METADATA_DOCS_RS_RUSTDOC_ARGS"
-  #       run: cargo doc --document-private-items --package graph_generation_language --all-features
+      - name: Prepare documentation from artifacts
+        run: |
+          # Extract documentation from crane-template-doc artifact
+          mkdir -p target/doc
+          if [ -d "artifacts/crane-template-doc" ]; then
+            cp -r artifacts/crane-template-doc/* target/doc/
+          fi
 
-  #     - name: Prepare GitHub Pages content
-  #       run: |
-  #         # Create demo directory in docs output
-  #         mkdir -p target/doc/demo
+      - name: Prepare GitHub Pages content
+        run: |
+          # Create demo directory in docs output
+          mkdir -p target/doc/demo
 
-  #         # Copy WASM demo files to demo subdirectory
-  #         cp -r examples/trunk/dist/* target/doc/demo/
+          # Copy WASM demo files from client-trunk artifact if available
+          if [ -d "artifacts/nix-rust-template-client-trunk" ]; then
+            cp -r artifacts/nix-rust-template-client-trunk/* target/doc/demo/ 2>/dev/null || true
+          fi
 
-  #         # Copy the GitHub Pages index template
-  #         cp .github/pages-index.html target/doc/index.html
+          # Copy the GitHub Pages index template as the main index
+          cp .github/pages_index.html target/doc/index.html
 
-  #     - name: Upload GitHub Pages content
-  #       uses: actions/upload-pages-artifact@v3
-  #       with:
-  #         path: target/doc
+      - name: Upload GitHub Pages content
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/doc
 
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   # Create release PR with version updates and changelog
-  # release-pr:
-  #   needs: ci
-  #   if: ${{ needs.ci.result == 'success' }}
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: write
-  #     pull-requests: write
-  #     actions: write
+  release-pr:
+    needs: omnix
+    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Run release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-  #   concurrency:
-  #     group: release-plz-${{ github.ref }}
-  #     cancel-in-progress: false
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
+  # Release unpublished packages
+  release:
+    needs: omnix
+    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Run release-plz
+        id: release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-  #     - uses: DeterminateSystems/nix-installer-action@main
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-  #     - name: Run release-plz
-  #       uses: release-plz/action@v0.5
-  #       with:
-  #         command: release-pr
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-  #         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nix-builds-ubuntu-latest
+          path: artifacts/
 
-  # # Release unpublished packages
-  # release:
-  #   needs: ci
-  #   if: ${{ needs.ci.result == 'success' }}
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: write
-  #     pull-requests: write
-  #     actions: write
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
+      - name: Setup Node.js
+        if: steps.release-plz.outputs.releases_created == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
-  #     - name: Setup Node.js
-  #       if: steps.release-plz.outputs.releases_created == 'true'
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '20'
-  #         registry-url: 'https://registry.npmjs.org'
+      - name: Prepare npm package from artifacts
+        if: steps.release-plz.outputs.releases_created == 'true'
+        run: |
+          # Extract web package from artifacts
+          if [ -d "artifacts/nix-rust-template-web" ]; then
+            mkdir -p pkg
+            cp -r artifacts/nix-rust-template-web/* pkg/
+          fi
 
-  #     - name: Publish to npm
-  #       if: steps.release-plz.outputs.releases_created == 'true'
-  #       run: |
-  #         cd pkg
-  #         npm publish
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  #     - name: Run release-plz
-  #       id: release-plz
-  #       uses: release-plz/action@v0.5
-  #       with:
-  #         command: release
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-  #         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Publish to npm
+        if: steps.release-plz.outputs.releases_created == 'true'
+        run: |
+          cd pkg
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
