@@ -62,11 +62,6 @@ jobs:
   #       # export RUSTDOCFLAGS="-Z unstable-options --document-hidden-items $METADATA_DOCS_RS_RUSTDOC_ARGS"
   #       run: cargo doc --document-private-items --package graph_generation_language --all-features
 
-  #     - name: Build WASM demo
-  #       run: |
-  #         cd examples/trunk
-  #         nix develop --command trunk build --release
-
   #     - name: Prepare GitHub Pages content
   #       run: |
   #         # Create demo directory in docs output
