@@ -10,13 +10,13 @@ members = [
 [workspace.package]
 version = "0.0.1"
 edition = "2021"
-description = "A rust and nix template repository."
-repository = "github.com/ocasazza/crane-template"
 license = "MIT"
+name = "rust-nix-template"
+description = "A rust and nix template repository."
 authors = ["Olive Casazza <olive.casazza@schrodinger.com>"]
-name = "graph_generation_language"
-homepage = "https://ocasazza.github.io/nix-rust-template/"
 documentation = "https://ocasazza.github.io/nix-rust-template/"
+repository = "github.com/ocasazza/rust-nix-template"
+homepage = "https://ocasazza.github.io/nix-rust-template/"
 readme = "README.md"
 keywords = ["nix", "wasm", "javascript", "typescript"]
 
