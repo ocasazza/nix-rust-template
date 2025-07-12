@@ -1,5 +1,14 @@
-use shared::Post;
 use wasm_bindgen::prelude::*;
 
+// #[wasm_bindgen]
+// pub struct Post(shared::Post);
+
 #[wasm_bindgen]
-pub struct IPost(shared::Post);
+extern {
+    fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn greet() {
+    alert("Hello, wasm-game-of-life!");
+}

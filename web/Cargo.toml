@@ -2,6 +2,9 @@
 name = "web"
 version.workspace = true
 edition.workspace = true
+description.workspace = true
+repository.workspace = true
+license.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
