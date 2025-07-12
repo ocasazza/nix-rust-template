@@ -235,6 +235,7 @@
           packages = [
             pkgs.trunk
             pkgs.wasm-pack
+            pkgs.act
           ];
         };
       }
