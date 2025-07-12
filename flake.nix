@@ -95,18 +95,6 @@
           }
         );
 
-        wasmSrc = with pkgs; lib.cleanSourceWith {
-          src = ./web/.; # The original, unfiltered source
-          filter = path: type:
-            (lib.hasSuffix "\.js" path) || # For plugin javascript
-            (lib.hasSuffix "\.json" path) || # For package.json
-            (lib.hasSuffix "\.ts" path) || # For typescript files
-            (lib.hasSuffix "README.md" path) ||
-            # Default filter from crane (allow .rs files)
-            (craneLib.filterCargoSources path type)
-          ;
-        };
-
         # Wasm packages
         # it's not possible to build the server on the
         # wasm32 target, so we only build the client.
@@ -123,26 +111,21 @@
           }
         );
 
-        myWeb = craneLib.buildPackage ( wasmArgsWeb // {
-          inherit wasmSrc;
+        myWeb = craneLib.mkCargoDerivation (wasmArgsWeb // {
+          cargoArtifacts = cargoArtifactsWasmWeb;
           doCheck = false;
-          doNotPostBuildInstallCargoBinaries = true;
-          doInstallCargoArtifacts = false;
-
-          preBuild = ''
-            cd ./web
-          '';
 
           buildPhaseCargoCommand = ''
-            HOME=$(mktemp -d fake-homeXXXX) wasm-pack build --target web
-          '';
-
-          postBuild = ''
-            mv ./pkg ..
+            HOME=$(mktemp -d fake-homeXXXX)
+            cd ./web
+            wasm-pack build --target web --out-dir pkg
             cd ..
           '';
 
-          cargoArtifacts = cargoArtifactsWasmWeb;
+          installPhaseCommand = ''
+            mkdir -p $out
+            cp -r ./web/pkg $out/
+          '';
 
           nativeBuildInputs = with pkgs; [
             binaryen
@@ -154,33 +137,6 @@
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             pkgs.libiconv
           ];
-
-          # buildInputs = with pkgs; [
-          #   binaryen
-          #   wasm-bindgen-cli
-          #   wasm-pack
-          #   nodejs
-          # ] ++ lib.optional stdenv.isLinux [
-          #   strace
-          # ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-          #   pkgs.libiconv
-          # ];
-
-          # wasm-bindgen-cli = pkgs.buildWasmBindgenCli rec {
-          #   src = pkgs.fetchCrate {
-          #     pname = "wasm-bindgen-cli";
-          #     version = "0.2.100";
-          #     hash = "sha256-3RJzK7mkYFrs7C/WkhW9Rr4LdP5ofb2FdYGz1P7Uxog=";
-          #     # hash = "sha256-3RJzK7mkYFrs7C/WkhW9Rr4LdP5ofb2FdYGz1P7Uxog=";
-          #   };
-          #   cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
-          #     inherit src;
-          #     inherit (src) pname version;
-          #     hash = "sha256-qsO12332HSjWCVKtf1cUePWWb9IdYUmT+8OPj/XP2WE=";
-          #     # hash = "sha256-qsO12332HSjWCVKtf1cUePWWb9IdYUmT+8OPj/XP2WE=";
-          #   };
-          # };
-
         });
 
         # Wasm packages
