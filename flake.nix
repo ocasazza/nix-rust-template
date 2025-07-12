@@ -79,6 +79,33 @@
         # all of that work (e.g. via cachix) when running in CI
         cargoArtifacts = craneLib.buildDepsOnly nativeArgs;
 
+
+        # build just the crate as an artifact
+        crateSrc = craneLib.cleanCargoSource ./.;
+        myCrate = craneLib.buildPackage {
+          inherit crateSrc;
+          strictDeps = true;
+          cargoVendorDir = craneLib.vendorMultipleCargoDeps {
+            inherit (craneLib.findCargoFiles src) cargoConfigs;
+            cargoLockList = [
+              ./shared/Cargo.lock
+              # Unfortunately this approach requires IFD (import-from-derivation)
+              # otherwise Nix will refuse to read the Cargo.lock from our toolchain
+              # (unless we build with `--impure`).
+              #
+              # Another way around this is to manually copy the rustlib `Cargo.lock`
+              # to the repo and import it with `./path/to/rustlib/Cargo.lock` which
+              # will avoid IFD entirely but will require manually keeping the file
+              # up to date!
+              "${rustToolchainFor.passthru.availableComponents.rust-src}/lib/rustlib/src/rust/library/Cargo.lock"
+            ];
+          };
+          cargoExtraArgs = "-Z build-std --target x86_64-unknown-linux-gnu";
+          buildInputs = [
+            # Add additional build inputs here
+          ];
+        };
+
         # Simple JSON API that can be queried by the client
         myServer = craneLib.buildPackage (
           nativeArgs
@@ -93,35 +120,30 @@
         # Wasm packages
         # it's not possible to build the server on the
         # wasm32 target, so we only build the client.
-        wasmArgsWeb = commonArgs // {
+        webWasmArgs = commonArgs // {
           pname = "nix-rust-template-web";
           cargoExtraArgs = "--package=nix-rust-template-web";
           CARGO_BUILD_TARGET = "wasm32-unknown-unknown";
         };
-
-        cargoArtifactsWasmWeb = craneLib.buildDepsOnly (
-          wasmArgsWeb
+        cargoArtifactsWeb = craneLib.buildDepsOnly (
+          webWasmArgs
           // {
             doCheck = false;
           }
         );
-
-        myWeb = craneLib.mkCargoDerivation (wasmArgsWeb // {
-          cargoArtifacts = cargoArtifactsWasmWeb;
+        myWasm = craneLib.mkCargoDerivation (webWasmArgs // {
+          cargoArtifacts = cargoArtifactsWeb;
           doCheck = false;
-
           buildPhaseCargoCommand = ''
             HOME=$(mktemp -d fake-homeXXXX)
             cd ./web
             wasm-pack build --target web --out-dir pkg
             cd ..
           '';
-
           installPhaseCommand = ''
             mkdir -p $out
             cp -r ./web/pkg $out/
           '';
-
           nativeBuildInputs = with pkgs; [
             binaryen
             wasm-bindgen-cli
@@ -191,7 +213,7 @@
       {
         checks = {
           # Build the crate as part of `nix flake check` for convenience
-          inherit myServer myClient myWeb;
+          inherit  myServer myClient myWasm;
 
           nix-rust-template-doc = craneLib.cargoDoc (
             commonArgs
@@ -220,6 +242,8 @@
           # my-app-fmt = craneLib.cargoFmt commonArgs;
         };
 
+
+        packages.default = myCrate;
         apps.default = flake-utils.lib.mkApp {
           name = "server";
           drv = myServer;
