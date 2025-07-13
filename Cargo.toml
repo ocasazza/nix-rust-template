@@ -17,7 +17,7 @@ authors = ["Olive Casazza <olive.casazza@schrodinger.com>"]
 documentation = "https://ocasazza.github.io/nix-rust-template/"
 repository = "github.com/ocasazza/rust-nix-template"
 homepage = "https://ocasazza.github.io/nix-rust-template/"
-readme = "README.md"
+readme = "readme.md"
 keywords = ["nix", "wasm", "javascript", "typescript"]
 
 [workspace.metadata.crane]
