@@ -1,5 +1,10 @@
+# build files
 /client/dist
+artifacts/
+dist/
 /target
 result*
+
+# configs
 .direnv
 .env

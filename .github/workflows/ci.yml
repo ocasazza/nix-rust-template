@@ -72,8 +72,8 @@ jobs:
         run: |
           # Extract documentation from crane-template-doc artifact
           mkdir -p target/doc
-          if [ -d "artifacts/crane-template-doc" ]; then
-            cp -r artifacts/crane-template-doc/* target/doc/
+          if [ -d "artifacts/nix-rust-template-doc" ]; then
+            cp -r artifacts/nix-rust-template-doc/* target/doc/
           fi
 
       - name: Prepare GitHub Pages content
@@ -81,10 +81,10 @@ jobs:
           # Create demo directory in docs output
           mkdir -p target/doc/demo
 
-          # Copy WASM demo files from client-trunk artifact if available
-          if [ -d "artifacts/nix-rust-template-client-trunk" ]; then
-            cp -r artifacts/nix-rust-template-client-trunk/* target/doc/demo/ 2>/dev/null || true
-          fi
+          # # Copy WASM demo files from client-trunk artifact if available
+          # if [ -d "artifacts/nix-rust-template-client" ]; then
+          #   cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
+          # fi
 
           # Copy the GitHub Pages index template as the main index
           cp .github/pages_index.html target/doc/index.html
@@ -120,6 +120,7 @@ jobs:
         uses: release-plz/action@v0.5
         with:
           command: release-pr
+          manifest_path: ./shared/Cargo.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
@@ -144,6 +145,7 @@ jobs:
         uses: release-plz/action@v0.5
         with:
           command: release
+          manifest_path: ./shared/Cargo.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
