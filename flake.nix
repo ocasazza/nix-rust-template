@@ -271,7 +271,7 @@
             echo "" > COVERAGE.md
             echo "# Project Information and Code Coverage" >> COVERAGE.md
             echo "## Code Statistics" >> COVERAGE.md
-            tokei --hidden -C >> COVERAGE.md
+            nix develop -c tokei --hidden -C >> COVERAGE.md
           '';
         };
 
