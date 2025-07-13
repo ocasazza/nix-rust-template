@@ -72,27 +72,19 @@ jobs:
           # Extract documentation from crane-template-doc artifact
           mkdir -p target/doc/rustdoc
           if [ -d "artifacts/nix-rust-template-doc" ]; then
-            cp -r artifacts/nix-rust-template-doc/*nix-rust-template-doc*/* target/doc/rustdoc
+            cp -r artifacts/nix-rust-template-doc target/doc/rustdoc
           fi
-
-      - name: Prepare GitHub Pages content
+      - name: Prepare GitHub Pages Demo content
         run: |
-          # Create demo directory in docs output
           mkdir -p target/doc/demo
-
-          # Copy WASM demo files from client-trunk artifact if available
           if [ -d "artifacts/nix-rust-template-client" ]; then
             cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
           fi
-
-          # Copy the GitHub Pages index template as the main index
           cp .github/pages_index.html target/doc/index.html
-
       - name: Upload GitHub Pages content
         uses: actions/upload-pages-artifact@v3
         with:
           path: target/doc
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
