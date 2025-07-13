@@ -38,7 +38,7 @@ jobs:
       - name: Run omnix CI
         run: om ci --verbose
       - name: collect artifacts from om build into an "artifacts/" folder
-        run: nix run .#copy-outpaths
+        run: nix run .#get-build-artifacts
       - name: Upload all build artifacts (combined)
         uses: actions/upload-artifact@v4
         with:

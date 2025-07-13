@@ -11,7 +11,6 @@ members = [
 version = "0.0.1"
 edition = "2021"
 license = "MIT"
-name = "rust-nix-template"
 description = "A rust and nix template repository."
 authors = ["Olive Casazza <olive.casazza@schrodinger.com>"]
 documentation = "https://ocasazza.github.io/nix-rust-template/"

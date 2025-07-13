@@ -3,9 +3,6 @@ use wasm_bindgen::prelude::*;
 
 
 #[wasm_bindgen]
-struct PostWrapper(nix_rust_template_shared::Post);
-
-#[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
 }

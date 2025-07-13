@@ -253,9 +253,9 @@
         };
 
         # App to copy all outpaths from result to ./dist folder
-        apps.get-build-outputs = flake-utils.lib.mkApp {
-          name = "get-build-outputs";
-          drv = pkgs.writeShellScriptBin "get-build-outputs" ''
+        apps.get-build-artifacts = flake-utils.lib.mkApp {
+          name = "get-build-artifacts";
+          drv = pkgs.writeShellScriptBin "get-build-artifacts" ''
             set -euo pipefail
             rm -rf artifacts
             mkdir -p artifacts
