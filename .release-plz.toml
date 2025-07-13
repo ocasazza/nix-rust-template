@@ -9,9 +9,16 @@ name = "nix-rust-template"
 changelog_update = true # enable changelog update
 publish = false
 
-
 [[package]]
 name = "nix-rust-template-client"
+publish = false
+
+[[package]]
+name = "nix-rust-template-server"
+publish = false
+
+[[package]]
+name = "nix-rust-template-web"
 publish = false
 
 [changelog]
