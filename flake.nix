@@ -253,11 +253,11 @@
         };
 
         # App to copy all outpaths from result to ./dist folder
-        apps.copy-outpaths = flake-utils.lib.mkApp {
-          name = "copy-outpaths";
-          drv = pkgs.writeShellScriptBin "copy-outpaths" ''
+        apps.get-build-outputs = flake-utils.lib.mkApp {
+          name = "get-build-outputs";
+          drv = pkgs.writeShellScriptBin "get-build-outputs" ''
             set -euo pipefail
-
+            rm -rf artifacts
             mkdir -p artifacts
             jq -r '.result.ROOT.build.byName | to_entries[] | "\(.key):\(.value)"' result | while IFS=':' read -r name path; do
               [ -e "$path" ] && mkdir -p "artifacts/$name" && cp -r "$path" "artifacts/$name/"

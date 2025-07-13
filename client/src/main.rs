@@ -5,15 +5,16 @@ use wasm_bindgen::prelude::*;
 fn main() {
     console_error_panic_hook::set_once();
     let post = Post {
-        title: "title".to_string(),
-        author_name: "author_name".to_string(),
-        text: "text".to_string(),
+        title: "Nix Rust Template".to_string(),
+        author_name: "Olive Casazza".to_string(),
+        text: "🚀 Blazingly Fast".to_string(),
     };
     let document = window()
         .and_then(|win| win.document())
         .expect("Could not access the document");
     let body = document.body().expect("Could not access document.body");
-    let text_node = document.create_text_node(post.author_name.as_str());
+    let greeting = format!("Hello {}!", post.author_name);
+    let text_node = document.create_text_node(&greeting);
     body.append_child(text_node.as_ref())
         .expect("Failed to append text");
 }

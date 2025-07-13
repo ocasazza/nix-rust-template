@@ -13,9 +13,9 @@ extern "C" {
 #[wasm_bindgen]
 pub fn greet() {
     let post = Post {
-        title: "title".to_string(),
-        author_name: "author_name".to_string(),
-        text: "text".to_string(),
+        title: "Nix Rust Template".to_string(),
+        author_name: "Olive Casazza".to_string(),
+        text: "🚀 Blazingly Fast".to_string(),
     };
     alert(post.author_name.as_str());
 }

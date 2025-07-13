@@ -2,9 +2,9 @@ use nix_rust_template_shared::Post;
 
 fn main() {
     let post = Post {
-        title: "title".to_string(),
-        author_name: "author_name".to_string(),
-        text: "text".to_string(),
+        title: "Nix Rust Template".to_string(),
+        author_name: "Olive Casazza".to_string(),
+        text: "🚀 Blazingly Fast".to_string(),
     };
     let name= post.author_name.as_str();
     eprintln!("Hello {name}!");
