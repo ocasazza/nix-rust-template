@@ -61,7 +61,7 @@
           strictDeps = true;
           buildInputs = [
             pkgs.cacert
-          # ] ++ lib.optionals pkgs.stdenv.isDarwin [
+          ] ++ lib.optionals pkgs.stdenv.isDarwin [
             pkgs.libiconv
             pkgs.openssl
             # Additional darwin specific inputs can be set here
@@ -142,10 +142,13 @@
             wasm-bindgen-cli
             wasm-pack
             nodejs
+            cacert
           ] ++ lib.optional stdenv.isLinux [
-            strace
+            pkgs.strace
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             pkgs.libiconv
+            pkgs.libiconv
+            pkgs.openssl
           ];
         });
 
