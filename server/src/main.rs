@@ -1,5 +1,8 @@
 use nix_rust_template::Post;
 
+/// The main function of the server application.
+///
+/// This function creates a new `Post` and then prints a greeting to stderr.
 fn main() {
     let post = Post {
         title: "Nix Rust Template".to_string(),

@@ -1,6 +1,10 @@
 use nix_rust_template::Post;
 use web_sys::window;
 
+/// The main function of the client application.
+///
+/// This function sets up the panic hook, creates a new `Post`,
+/// and then appends a greeting to the document body.
 fn main() {
     console_error_panic_hook::set_once();
     let post = Post {

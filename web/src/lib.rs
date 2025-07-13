@@ -6,6 +6,7 @@ extern "C" {
     fn alert(s: &str);
 }
 
+/// A function that creates a new `Post` and then alerts the author's name.
 #[wasm_bindgen]
 pub fn greet() {
     let post = Post {
