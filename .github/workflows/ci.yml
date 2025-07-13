@@ -30,13 +30,8 @@ jobs:
       - name: Install omnix
         run: nix --accept-flake-config profile install "github:juspay/omnix"
       - run: om ci
-      - name: Process and upload build artifacts
-        run: |
-          mkdir -p artifacts
-          jq -r '.result.ROOT.build.byName | to_entries[] | "\(.key):\(.value)"' result | while IFS=':' read -r name path; do
-            [ -e "$path" ] && mkdir -p "artifacts/$name" && cp -r "$path" "artifacts/$name/" && echo "Prepared artifact: $name"
-          done
-
+      - name: collect artifacts from om build into an "artifacts/" folder
+        run: nix run .#copy-outpaths
       - name: Upload all build artifacts (combined)
         uses: actions/upload-artifact@v4
         with:
@@ -57,17 +52,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: nix-builds-ubuntu-latest
           path: artifacts/
-
       - name: Configure GitHub pages
         id: pages
         uses: actions/configure-pages@v5
-
       - name: Prepare documentation from artifacts
         run: |
           # Extract documentation from crane-template-doc artifact
@@ -76,18 +68,18 @@ jobs:
             cp -r artifacts/nix-rust-template-doc/*nix-rust-template-doc*/* target/doc/rustdoc
           fi
 
-      # - name: Prepare GitHub Pages content
-      #   run: |
-      #     # Create demo directory in docs output
-      #     mkdir -p target/doc/demo
+      - name: Prepare GitHub Pages content
+        run: |
+          # Create demo directory in docs output
+          mkdir -p target/doc/demo
 
-      #     # Copy WASM demo files from client-trunk artifact if available
-      #     if [ -d "artifacts/nix-rust-template-client" ]; then
-      #       cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
-      #     fi
+          # Copy WASM demo files from client-trunk artifact if available
+          if [ -d "artifacts/nix-rust-template-client" ]; then
+            cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
+          fi
 
-      #     # Copy the GitHub Pages index template as the main index
-      #     cp .github/pages_index.html target/doc/index.html
+          # Copy the GitHub Pages index template as the main index
+          cp .github/pages_index.html target/doc/index.html
 
       - name: Upload GitHub Pages content
         uses: actions/upload-pages-artifact@v3
