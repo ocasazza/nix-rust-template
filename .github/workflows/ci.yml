@@ -6,101 +6,101 @@ on:
     # branches: ['main']
 
 jobs:
-  omnix:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          # - ubuntu-24.04
-          # - ubuntu-22.04
-          # - ubuntu-22.04-arm
-          # - ubuntu-24.04-arm
-          # - macos-latest
-          # - macos-14
-          # - macos-15
-          # - macos-13
-          # - windows-latest
-          # - windows-2025
-          # - windows-2022
-          # - windows-11-arm
-    steps:
-      - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@main
-      - name: Install omnix
-        run: nix --accept-flake-config profile install "github:juspay/omnix"
-      - name: Debug system info
-        run: |
-          echo "System: $(uname -a)"
-          echo "Nix version: $(nix --version)"
-          echo "Om version: $(om --version)"
-          echo "Available systems: $(nix eval --impure --expr 'builtins.currentSystem')"
-      - name: Run omnix CI
-        run: om ci --verbose
-      - name: collect artifacts from om build into an "artifacts/" folder
-        run: nix run .#copy-outpaths
-      - name: Upload all build artifacts (combined)
-        uses: actions/upload-artifact@v4
-        with:
-          name: nix-builds-${{ matrix.os }}
-          path: artifacts/
-          retention-days: 7
-          compression-level: 6
+  # omnix:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - ubuntu-latest
+  #         # - ubuntu-24.04
+  #         # - ubuntu-22.04
+  #         # - ubuntu-22.04-arm
+  #         # - ubuntu-24.04-arm
+  #         # - macos-latest
+  #         # - macos-14
+  #         # - macos-15
+  #         # - macos-13
+  #         # - windows-latest
+  #         # - windows-2025
+  #         # - windows-2022
+  #         # - windows-11-arm
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: DeterminateSystems/nix-installer-action@main
+  #     - name: Install omnix
+  #       run: nix --accept-flake-config profile install "github:juspay/omnix"
+  #     - name: Debug system info
+  #       run: |
+  #         echo "System: $(uname -a)"
+  #         echo "Nix version: $(nix --version)"
+  #         echo "Om version: $(om --version)"
+  #         echo "Available systems: $(nix eval --impure --expr 'builtins.currentSystem')"
+  #     - name: Run omnix CI
+  #       run: om ci --verbose
+  #     - name: collect artifacts from om build into an "artifacts/" folder
+  #       run: nix run .#copy-outpaths
+  #     - name: Upload all build artifacts (combined)
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: nix-builds-${{ matrix.os }}
+  #         path: artifacts/
+  #         retention-days: 7
+  #         compression-level: 6
 
-  pages:
-    needs: omnix
-    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: nix-builds-ubuntu-latest
-          path: artifacts/
-      - name: Configure GitHub pages
-        id: pages
-        uses: actions/configure-pages@v5
-      - name: Prepare documentation from artifacts
-        run: |
-          # Extract documentation from crane-template-doc artifact
-          mkdir -p target/doc/rustdoc
-          if [ -d "artifacts/nix-rust-template-doc" ]; then
-            cp -r artifacts/nix-rust-template-doc/*nix-rust-template-doc*/* target/doc/rustdoc
-          fi
+  # pages:
+  #   needs: omnix
+  #   if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
+  #   permissions:
+  #     pages: write
+  #     id-token: write
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: nix-builds-ubuntu-latest
+  #         path: artifacts/
+  #     - name: Configure GitHub pages
+  #       id: pages
+  #       uses: actions/configure-pages@v5
+  #     - name: Prepare documentation from artifacts
+  #       run: |
+  #         # Extract documentation from crane-template-doc artifact
+  #         mkdir -p target/doc/rustdoc
+  #         if [ -d "artifacts/nix-rust-template-doc" ]; then
+  #           cp -r artifacts/nix-rust-template-doc/*nix-rust-template-doc*/* target/doc/rustdoc
+  #         fi
 
-      - name: Prepare GitHub Pages content
-        run: |
-          # Create demo directory in docs output
-          mkdir -p target/doc/demo
+  #     - name: Prepare GitHub Pages content
+  #       run: |
+  #         # Create demo directory in docs output
+  #         mkdir -p target/doc/demo
 
-          # Copy WASM demo files from client-trunk artifact if available
-          if [ -d "artifacts/nix-rust-template-client" ]; then
-            cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
-          fi
+  #         # Copy WASM demo files from client-trunk artifact if available
+  #         if [ -d "artifacts/nix-rust-template-client" ]; then
+  #           cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
+  #         fi
 
-          # Copy the GitHub Pages index template as the main index
-          cp .github/pages_index.html target/doc/index.html
+  #         # Copy the GitHub Pages index template as the main index
+  #         cp .github/pages_index.html target/doc/index.html
 
-      - name: Upload GitHub Pages content
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: target/doc
+  #     - name: Upload GitHub Pages content
+  #       uses: actions/upload-pages-artifact@v3
+  #       with:
+  #         path: target/doc
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+  #     - name: Deploy to GitHub Pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v4
 
   # Create release PR with version updates and changelog
   release-pr:
-    needs: omnix
-    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
+    # needs: omnix
+    # if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -125,8 +125,8 @@ jobs:
 
   # Release unpublished packages
   release:
-    needs: omnix
-    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    # needs: omnix
+    # if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
