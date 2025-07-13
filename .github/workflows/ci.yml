@@ -1,9 +1,9 @@
 name: 'CI/CD'
 on:
   pull_request:
-  #   branches: ['main']
+    branches: ['main']
   push:
-    # branches: ['main']
+    branches: ['main']
 
 jobs:
   omnix:
@@ -47,55 +47,55 @@ jobs:
           retention-days: 7
           compression-level: 6
 
-  # pages:
-  #   needs: omnix
-  #   if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
-  #   permissions:
-  #     pages: write
-  #     id-token: write
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Download build artifacts
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: nix-builds-ubuntu-latest
-  #         path: artifacts/
-  #     - name: Configure GitHub pages
-  #       id: pages
-  #       uses: actions/configure-pages@v5
-  #     - name: Prepare documentation from artifacts
-  #       run: |
-  #         # Extract documentation from crane-template-doc artifact
-  #         mkdir -p target/doc/rustdoc
-  #         if [ -d "artifacts/nix-rust-template-doc" ]; then
-  #           cp -r artifacts/nix-rust-template-doc/*nix-rust-template-doc*/* target/doc/rustdoc
-  #         fi
+  pages:
+    needs: omnix
+    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nix-builds-ubuntu-latest
+          path: artifacts/
+      - name: Configure GitHub pages
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Prepare documentation from artifacts
+        run: |
+          # Extract documentation from crane-template-doc artifact
+          mkdir -p target/doc/rustdoc
+          if [ -d "artifacts/nix-rust-template-doc" ]; then
+            cp -r artifacts/nix-rust-template-doc/*nix-rust-template-doc*/* target/doc/rustdoc
+          fi
 
-  #     - name: Prepare GitHub Pages content
-  #       run: |
-  #         # Create demo directory in docs output
-  #         mkdir -p target/doc/demo
+      - name: Prepare GitHub Pages content
+        run: |
+          # Create demo directory in docs output
+          mkdir -p target/doc/demo
 
-  #         # Copy WASM demo files from client-trunk artifact if available
-  #         if [ -d "artifacts/nix-rust-template-client" ]; then
-  #           cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
-  #         fi
+          # Copy WASM demo files from client-trunk artifact if available
+          if [ -d "artifacts/nix-rust-template-client" ]; then
+            cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
+          fi
 
-  #         # Copy the GitHub Pages index template as the main index
-  #         cp .github/pages_index.html target/doc/index.html
+          # Copy the GitHub Pages index template as the main index
+          cp .github/pages_index.html target/doc/index.html
 
-  #     - name: Upload GitHub Pages content
-  #       uses: actions/upload-pages-artifact@v3
-  #       with:
-  #         path: target/doc
+      - name: Upload GitHub Pages content
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/doc
 
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   # Create release PR with version updates and changelog
   release-pr:
