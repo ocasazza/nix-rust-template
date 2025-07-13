@@ -1,8 +1,8 @@
 # build files
-/client/dist
-artifacts/
+target/
+pkg/
 dist/
-/target
+artifacts/
 result*
 
 # configs
