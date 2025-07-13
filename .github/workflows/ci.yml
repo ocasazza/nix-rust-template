@@ -47,9 +47,100 @@ jobs:
           retention-days: 7
           compression-level: 6
 
-  pages:
+  # Create release PR with version updates and changelog
+  release-pr:
     needs: omnix
     if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Run release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+          manifest_path: ./shared/Cargo.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  # Release unpublished packages
+  release:
+    needs: omnix
+    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release-plz.outputs.releases_created }}
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run release-plz
+        id: release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release
+          manifest_path: ./shared/Cargo.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+
+  npm:
+    needs: release
+    if: needs.release.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nix-builds-ubuntu-latest
+        path: artifacts/
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Prepare npm package from artifacts
+      run: |
+        # Extract web package from artifacts
+        if [ -d "artifacts/nix-rust-template-web" ]; then
+          mkdir -p pkg
+          cp -r artifacts/nix-rust-template-web/* pkg/
+        fi
+
+    - name: Publish to npm
+      run: |
+        cd pkg
+        npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+  pages:
+    needs: release
+    if: ${{ needs.release.outputs.releases_created == 'true' }}
     permissions:
       pages: write
       id-token: write
@@ -96,85 +187,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  # Create release PR with version updates and changelog
-  release-pr:
-    needs: omnix
-    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      actions: write
-    concurrency:
-      group: release-plz-${{ github.ref }}
-      cancel-in-progress: false
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: DeterminateSystems/nix-installer-action@main
-      - name: Run release-plz
-        uses: release-plz/action@v0.5
-        with:
-          command: release-pr
-          manifest_path: ./shared/Cargo.toml
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-  # Release unpublished packages
-  release:
-    needs: omnix
-    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      actions: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run release-plz
-        id: release-plz
-        uses: release-plz/action@v0.5
-        with:
-          command: release
-          manifest_path: ./shared/Cargo.toml
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: nix-builds-ubuntu-latest
-          path: artifacts/
-
-      - name: Setup Node.js
-        if: steps.release-plz.outputs.releases_created == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Prepare npm package from artifacts
-        if: steps.release-plz.outputs.releases_created == 'true'
-        run: |
-          # Extract web package from artifacts
-          if [ -d "artifacts/nix-rust-template-web" ]; then
-            mkdir -p pkg
-            cp -r artifacts/nix-rust-template-web/* pkg/
-          fi
-
-      - name: Publish to npm
-        if: steps.release-plz.outputs.releases_created == 'true'
-        run: |
-          cd pkg
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
