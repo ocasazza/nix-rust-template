@@ -94,7 +94,6 @@
           nativeArgs
           // {
             inherit cargoArtifacts;
-            cargoVendorDir = null;
           }
         );
 
@@ -108,7 +107,8 @@
             inherit cargoArtifacts;
             # The server needs to know where the client's dist dir is to
             # serve it, so we pass it as an environment variable at build time
-            CLIENT_DIST = myClient;
+            # Use a placeholder path during build, the actual client will be available separately
+            CLIENT_DIST = "./client/dist";
           }
         );
 
