@@ -129,7 +129,7 @@ jobs:
         # Extract web package from artifacts
         if [ -d "artifacts/nix_rust_template-web" ]; then
           mkdir -p pkg
-          cp -r artifacts/nix_rust_template-web/* pkg/
+          cp -r artifacts/web/*/pkg pkg/
         fi
 
     - name: Publish to npm
