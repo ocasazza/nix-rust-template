@@ -13,7 +13,6 @@ fn main() {
 // uncomment the following, and the additional dependencies
 // in Cargo.toml for a more complex axum tokio based server
 
-
 // use axum::{Json, Router, routing::get};
 // use tower_http::{cors::CorsLayer, services::ServeDir};
 
