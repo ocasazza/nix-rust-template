@@ -6,7 +6,7 @@ fn main() {
         author_name: "author_name".to_string(),
         text: "text".to_string(),
     };
-    let name:= post.author_name.as_str();
+    let name= post.author_name.as_str();
     eprintln!("Hello {name}!");
 }
 
