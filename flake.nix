@@ -65,6 +65,9 @@
             pkgs.libiconv
             pkgs.openssl
             # Additional darwin specific inputs can be set here
+          ] ++ lib.optionals pkgs.stdenv.isLinux [
+            pkgs.openssl
+            pkgs.pkg-config
           ];
           # Set SSL certificate environment variables
           SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
@@ -143,10 +146,10 @@
             wasm-pack
             nodejs
             cacert
-          ] ++ lib.optional stdenv.isLinux [
-            pkgs.strace
-          ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-            pkgs.libiconv
+          ] ++ lib.optionals stdenv.isLinux [
+            # Linux-specific tools for debugging if needed
+            # pkgs.strace
+          ] ++ lib.optionals stdenv.isDarwin [
             pkgs.libiconv
             pkgs.openssl
           ];

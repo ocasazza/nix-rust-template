@@ -29,7 +29,14 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - name: Install omnix
         run: nix --accept-flake-config profile install "github:juspay/omnix"
-      - run: om ci
+      - name: Debug system info
+        run: |
+          echo "System: $(uname -a)"
+          echo "Nix version: $(nix --version)"
+          echo "Om version: $(om --version)"
+          echo "Available systems: $(nix eval --impure --expr 'builtins.currentSystem')"
+      - name: Run omnix CI
+        run: om ci --verbose
       - name: collect artifacts from om build into an "artifacts/" folder
         run: nix run .#copy-outpaths
       - name: Upload all build artifacts (combined)
