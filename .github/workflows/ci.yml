@@ -37,6 +37,7 @@ jobs:
           echo "Available systems: $(nix eval --impure --expr 'builtins.currentSystem')"
       - name: Run omnix CI
         run: om ci --verbose
+      - run: nix run .#update-repo-info
       - name: collect artifacts from om build into an "artifacts/" folder
         run: nix run .#get-build-artifacts
       - name: Upload all build artifacts (combined)
@@ -78,7 +79,7 @@ jobs:
   # Release unpublished packages
   release:
     needs: omnix
-    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    if: ${{ needs.omnix.result == 'success' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     outputs:
       releases_created: ${{ steps.release-plz.outputs.releases_created }}
@@ -138,7 +139,6 @@ jobs:
         npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
 
   pages:
     needs: release

@@ -214,7 +214,7 @@
           # Build the crate as part of `nix flake check` for convenience
           inherit myShared myWeb myServer myClient; # myCli;
 
-          myDocs = craneLib.cargoDoc (
+          docs = craneLib.cargoDoc (
             commonArgs
             // {
               inherit cargoArtifacts;
@@ -227,32 +227,30 @@
           # Note that this is done as a separate derivation so that
           # we can block the CI if there are issues here, but not
           # prevent downstream consumers from building our crate by itself.
-          # server-clippy = craneLib.cargoClippy (
-          #   commonArgs
-          #   // {
-          #     inherit cargoArtifacts;
-          #     cargoClippyExtraArgs = "--all-targets -- --deny warnings";
-          #     # Here we don't care about serving the frontend
-          #     CLIENT_DIST = "./client";
-          #   }
-          # );
+          clippy = craneLib.cargoClippy (
+            commonArgs
+            // {
+              inherit cargoArtifacts;
+              cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+              # Here we don't care about serving the frontend
+              CLIENT_DIST = "./client";
+            }
+          );
 
           # Check formatting
-          # my-app-fmt = craneLib.cargoFmt commonArgs;
+          fmt = craneLib.cargoFmt commonArgs;
         };
-
 
         packages.default = myShared;
         packages.nix_rust_template = myShared;
         packages.nix_rust_template-web = myWeb;
-
 
         apps.server = flake-utils.lib.mkApp {
           name = "nix_rust_template-server";
           drv = myServer;
         };
 
-        # App to copy all outpaths from result to ./dist folder
+        # app to copy all outpaths from omnix result to local ./artifacts folder
         apps.get-build-artifacts = flake-utils.lib.mkApp {
           name = "get-build-artifacts";
           drv = pkgs.writeShellScriptBin "get-build-artifacts" ''
@@ -262,6 +260,18 @@
             jq -r '.result.ROOT.build.byName | to_entries[] | "\(.key):\(.value)"' result | while IFS=':' read -r name path; do
               [ -e "$path" ] && mkdir -p "artifacts/$name" && cp -r "$path" "artifacts/$name/"
             done
+          '';
+        };
+
+        # app to update repository statistics, coverage info, etc
+        apps.update-repo-info = flake-utils.lib.mkApp {
+          name = "update-repo-info";
+          drv = pkgs.writeShellScriptBin "update-repo-info" ''
+            set -euo pipefail
+            echo "" > COVERAGE.md
+            echo "# Project Information and Code Coverage" >> COVERAGE.md
+            echo "## Code Statistics" >> COVERAGE.md
+            tokei --hidden -C >> COVERAGE.md
           '';
         };
 
@@ -275,16 +285,12 @@
           '';
           # Extra inputs can be added here; cargo and rustc are provided by default.
           packages = [
+            pkgs.act
+            pkgs.rust-analyzer
+            pkgs.rustup
             pkgs.trunk
             pkgs.wasm-pack
-            pkgs.act
-            pkgs.rustup
-            # LSP and development tools
-            pkgs.rust-analyzer
-            pkgs.rustfmt
-            pkgs.clippy
-            # Environment management
-            pkgs.direnv
+            pkgs.tokei
           ];
         };
       }

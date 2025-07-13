@@ -1,7 +1,6 @@
 use nix_rust_template::Post;
 use wasm_bindgen::prelude::*;
 
-
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);

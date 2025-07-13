@@ -18,7 +18,6 @@ fn main() {
         .expect("Failed to append text");
 }
 
-
 // uncomment the following, and the additional dependencies
 // in Cargo.toml for a more complex yew based frontend
 

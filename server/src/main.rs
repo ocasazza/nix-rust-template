@@ -6,7 +6,7 @@ fn main() {
         author_name: "Olive Casazza".to_string(),
         text: "🚀 Blazingly Fast".to_string(),
     };
-    let name= post.author_name.as_str();
+    let name = post.author_name.as_str();
     eprintln!("Hello {name}!");
 }
 
