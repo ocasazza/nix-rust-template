@@ -1,4 +1,4 @@
-# Omnix configuration for nix-rust-template
+# Omnix configuration for nix_rust_template
 # This ensures consistent CI behavior across platforms
 
 [ci]

@@ -1,1 +1,1 @@
-# nix-rust-template
+# nix_rust_template

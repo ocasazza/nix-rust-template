@@ -79,7 +79,7 @@
         # i.e. non-wasm / non-browser stuff first
         # ---------------------------------------
         nativeArgs = commonArgs // {
-          pname = "nix-rust-template";
+          pname = "nix_rust_template";
         };
 
         # Build *just* the cargo dependencies, so we can reuse
@@ -118,7 +118,7 @@
         # ----------------------------
         wasmArgs = commonArgs // {
           pname = "web";
-          cargoExtraArgs = "--package=nix-rust-template-web";
+          cargoExtraArgs = "--package=nix_rust_template-web";
           CARGO_BUILD_TARGET = "wasm32-unknown-unknown";
         };
         wasmCargoArtifacts = craneLib.buildDepsOnly (
@@ -161,7 +161,7 @@
         # -----------------------------
         webArgs = commonArgs // {
           pname = "client";
-          cargoExtraArgs = "--package=nix-rust-template-client";
+          cargoExtraArgs = "--package=nix_rust_template-client";
           CARGO_BUILD_TARGET = "wasm32-unknown-unknown";
         };
         webCargoArtifacts = craneLib.buildDepsOnly (
@@ -243,12 +243,12 @@
 
 
         packages.default = myShared;
-        packages.nix-rust-template = myShared;
-        packages.nix-rust-template-web = myWeb;
+        packages.nix_rust_template = myShared;
+        packages.nix_rust_template-web = myWeb;
 
 
         apps.server = flake-utils.lib.mkApp {
-          name = "nix-rust-template-server";
+          name = "nix_rust_template-server";
           drv = myServer;
         };
 

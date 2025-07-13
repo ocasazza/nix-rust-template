@@ -127,9 +127,9 @@ jobs:
     - name: Prepare npm package from artifacts
       run: |
         # Extract web package from artifacts
-        if [ -d "artifacts/nix-rust-template-web" ]; then
+        if [ -d "artifacts/nix_rust_template-web" ]; then
           mkdir -p pkg
-          cp -r artifacts/nix-rust-template-web/* pkg/
+          cp -r artifacts/nix_rust_template-web/* pkg/
         fi
 
     - name: Publish to npm
@@ -164,8 +164,8 @@ jobs:
         run: |
           # Extract documentation from crane-template-doc artifact
           mkdir -p target/doc/rustdoc
-          if [ -d "artifacts/nix-rust-template-doc" ]; then
-            cp -r artifacts/nix-rust-template-doc/*nix-rust-template-doc*/* target/doc/rustdoc
+          if [ -d "artifacts/nix_rust_template-doc" ]; then
+            cp -r artifacts/nix_rust_template-doc/*nix_rust_template-doc*/* target/doc/rustdoc
           fi
 
       - name: Prepare GitHub Pages content
@@ -174,8 +174,8 @@ jobs:
           mkdir -p target/doc/demo
 
           # Copy WASM demo files from client-trunk artifact if available
-          if [ -d "artifacts/nix-rust-template-client" ]; then
-            cp -r artifacts/nix-rust-template-client/* target/doc/demo/ 2>/dev/null || true
+          if [ -d "artifacts/nix_rust_template-client" ]; then
+            cp -r artifacts/nix_rust_template-client/* target/doc/demo/ 2>/dev/null || true
           fi
 
           # Copy the GitHub Pages index template as the main index

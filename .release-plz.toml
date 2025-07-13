@@ -1,24 +1,24 @@
-# Release configuration for nix-rust-template
+# Release configuration for nix_rust_template
 # Only process the shared library package
 
 [workspace]
 allow_dirty = true # allow updating repositories with uncommitted changes
 
 [[package]]
-name = "nix-rust-template"
+name = "nix_rust_template"
 changelog_update = true # enable changelog update
 publish = false
 
 [[package]]
-name = "nix-rust-template-client"
+name = "nix_rust_template-client"
 publish = false
 
 [[package]]
-name = "nix-rust-template-server"
+name = "nix_rust_template-server"
 publish = false
 
 [[package]]
-name = "nix-rust-template-web"
+name = "nix_rust_template-web"
 publish = false
 
 [changelog]

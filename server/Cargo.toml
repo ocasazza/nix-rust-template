@@ -1,11 +1,11 @@
 [package]
-name = "nix-rust-template-server"
+name = "nix_rust_template-server"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-nix-rust-template = { path = "../shared" }
+nix_rust_template = { path = "../shared" }
 
 # uncomment for a more complex axum + tokio based backend server
 # axum = "0.8.4"

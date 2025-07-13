@@ -13,12 +13,12 @@ edition = "2021"
 license = "MIT"
 description = "A rust and nix template repository."
 authors = ["Olive Casazza <olive.casazza@schrodinger.com>"]
-documentation = "https://ocasazza.github.io/nix-rust-template/"
+documentation = "https://ocasazza.github.io/nix_rust_template/"
 repository = "https://github.com/ocasazza/rust-nix-template"
-homepage = "https://ocasazza.github.io/nix-rust-template/"
+homepage = "https://ocasazza.github.io/nix_rust_template/"
 readme = "readme.md"
 keywords = ["nix", "wasm", "javascript", "typescript"]
 
 [workspace.metadata.crane]
-name = "nix-rust-template"
+name = "nix_rust_template"
 version = "0.0.1"
