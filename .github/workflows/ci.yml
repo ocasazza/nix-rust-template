@@ -70,6 +70,7 @@ jobs:
         with:
           command: release-pr
           manifest_path: ./shared/Cargo.toml
+          config: .release-plz.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
@@ -96,6 +97,7 @@ jobs:
         with:
           command: release
           manifest_path: ./shared/Cargo.toml
+          config: .release-plz.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
