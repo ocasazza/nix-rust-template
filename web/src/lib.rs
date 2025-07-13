@@ -1,4 +1,4 @@
-use nix_rust_template_shared::Post;
+use nix_rust_template::Post;
 use wasm_bindgen::prelude::*;
 
 

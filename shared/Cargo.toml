@@ -1,5 +1,5 @@
 [package]
-name = "nix-rust-template-shared"
+name = "nix-rust-template"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

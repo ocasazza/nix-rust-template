@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.1](https://github.com/ocasazza/nix-rust-template/releases/tag/nix-rust-template-shared-v0.0.1) - 2025-07-13
+## [0.0.1](https://github.com/ocasazza/nix-rust-template/releases/tag/nix-rust-template-v0.0.1) - 2025-07-13
 
 ### Other
 

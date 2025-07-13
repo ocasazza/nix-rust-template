@@ -5,7 +5,7 @@
 allow_dirty = true # allow updating repositories with uncommitted changes
 
 [[package]]
-name = "nix-rust-template-shared"
+name = "nix-rust-template"
 changelog_update = true # enable changelog update
 publish = false
 

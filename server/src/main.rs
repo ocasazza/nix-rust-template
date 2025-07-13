@@ -1,4 +1,4 @@
-use nix_rust_template_shared::Post;
+use nix_rust_template::Post;
 
 fn main() {
     let post = Post {

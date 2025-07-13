@@ -1,4 +1,4 @@
-use nix_rust_template_shared::Post;
+use nix_rust_template::Post;
 use web_sys::window;
 
 fn main() {
@@ -24,7 +24,7 @@ fn main() {
 
 // use gloo::net;
 // use yew::prelude::*;
-// use nix_rust_template_shared::Post;
+// use nix_rust_template::Post;
 
 // async fn request_posts() -> Vec<Post> {
 //     net::http::Request::get("http://localhost:8000/posts")

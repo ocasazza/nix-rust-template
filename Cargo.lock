@@ -41,11 +41,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13dc2df351e3202783a1fe0d44375f7295ffb4049267b0f3018346dc122a1d94"
 
 [[package]]
+name = "nix-rust-template"
+version = "0.0.1"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "nix-rust-template-client"
 version = "0.0.1"
 dependencies = [
  "console_error_panic_hook",
- "nix-rust-template-shared",
+ "nix-rust-template",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -54,21 +61,14 @@ dependencies = [
 name = "nix-rust-template-server"
 version = "0.0.1"
 dependencies = [
- "nix-rust-template-shared",
-]
-
-[[package]]
-name = "nix-rust-template-shared"
-version = "0.0.1"
-dependencies = [
- "serde",
+ "nix-rust-template",
 ]
 
 [[package]]
 name = "nix-rust-template-web"
 version = "0.0.1"
 dependencies = [
- "nix-rust-template-shared",
+ "nix-rust-template",
  "wasm-bindgen",
 ]
 

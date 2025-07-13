@@ -79,7 +79,7 @@
         # i.e. non-wasm / non-browser stuff first
         # ---------------------------------------
         nativeArgs = commonArgs // {
-          pname = "nix-rust-template-shared";
+          pname = "nix-rust-template";
         };
 
         # Build *just* the cargo dependencies, so we can reuse
@@ -243,7 +243,7 @@
 
 
         packages.default = myShared;
-        packages.nix-rust-template-shared = myShared;
+        packages.nix-rust-template = myShared;
         packages.nix-rust-template-web = myWeb;
 
 
