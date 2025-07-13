@@ -69,7 +69,7 @@ jobs:
         uses: release-plz/action@v0.5
         with:
           command: release-pr
-          manifest_path: ./shared/Cargo.toml
+          # manifest_path: ./shared/Cargo.toml
           config: .release-plz.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -96,7 +96,7 @@ jobs:
         uses: release-plz/action@v0.5
         with:
           command: release
-          manifest_path: ./shared/Cargo.toml
+          # manifest_path: ./shared/Cargo.toml
           config: .release-plz.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
