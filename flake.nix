@@ -243,6 +243,9 @@
 
 
         packages.default = myShared;
+        packages.nix-rust-template-shared = myShared;
+        packages.nix-rust-template-web = myWeb;
+
 
         apps.server = flake-utils.lib.mkApp {
           name = "nix-rust-template-server";
@@ -267,6 +270,8 @@
           checks = self.checks.${system};
           shellHook = ''
             export CLIENT_DIST=$PWD/client/dist;
+            # Ensure rust-analyzer can find the toolchain
+            # export RUST_SRC_PATH="${rustToolchainFor pkgs}/lib/rustlib/src/rust/library";
           '';
           # Extra inputs can be added here; cargo and rustc are provided by default.
           packages = [
@@ -274,6 +279,12 @@
             pkgs.wasm-pack
             pkgs.act
             pkgs.rustup
+            # LSP and development tools
+            pkgs.rust-analyzer
+            pkgs.rustfmt
+            pkgs.clippy
+            # Environment management
+            pkgs.direnv
           ];
         };
       }

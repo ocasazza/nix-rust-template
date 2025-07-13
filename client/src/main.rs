@@ -1,8 +1,6 @@
-use web_sys::window;
 use nix_rust_template_shared::Post;
+use web_sys::window;
 use wasm_bindgen::prelude::*;
-
-struct Post(shared::Post);
 
 fn main() {
     console_error_panic_hook::set_once();

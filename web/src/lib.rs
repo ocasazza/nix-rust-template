@@ -1,8 +1,9 @@
 use nix_rust_template_shared::Post;
 use wasm_bindgen::prelude::*;
 
+
 #[wasm_bindgen]
-pub struct Post(shared::Post);
+struct PostWrapper(nix_rust_template_shared::Post);
 
 #[wasm_bindgen]
 extern "C" {
